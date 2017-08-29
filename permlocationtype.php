@@ -146,6 +146,22 @@ function getPermissionedLocationType() {
 }
 
 /**
+ * Function to remove non-permissioned emails.
+ *
+ */
+function removeEmails(&$emails) {
+  $ltGov = getPermissionedLocationType();
+  if (!empty($emails)) {
+    foreach ($emails as $key => $email) {
+      if ($email['location_type_id'] == $ltGov) {
+        unset($emails[$key]);
+      }
+    }
+  }
+  return $emails;
+}
+
+/**
  * Implementation of hook_civicrm_pageRun
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
@@ -153,14 +169,7 @@ function getPermissionedLocationType() {
 function permlocationtype_civicrm_pageRun(&$page) {
   if (CRM_Core_Permission::check('access LtGov location type') && get_class($page) == "CRM_Contact_Page_View_Summary") {
     $emails = CRM_Core_Smarty::singleton()->get_template_vars('email');
-    $ltGov = getPermissionedLocationType();
-    if (!empty($emails)) {
-      foreach ($emails as $key => $email) {
-        if ($email['location_type_id'] == $ltGov) {
-          unset($emails[$key]);
-        }
-      }
-    }
+    removeEmails($emails);
     CRM_Core_Smarty::singleton()->assign('email', $emails);
   }
   if (!CRM_Core_Permission::check('access LtGov location type') && get_class($page) == "CRM_Admin_Page_LocationType") {
@@ -170,6 +179,42 @@ function permlocationtype_civicrm_pageRun(&$page) {
       unset($rows[$ltGov]);
       CRM_Core_Smarty::singleton()->assign('rows', $rows);
     }
+  }
+}
+
+/**
+ * Implementation of hook_civicrm_buildForm
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
+ */
+function permlocationtype_civicrm_buildForm($formName, &$form) {
+  if (CRM_Core_Permission::check('access LtGov location type') && in_array($formName, array("CRM_Contact_Form_Inline_Email", "CRM_Contact_Form_Contact"))) {
+    if (!empty($form->_values['email'])) {
+      $ltGov = getPermissionedLocationType();
+      foreach ($form->_values['email'] as $instance => $email) {
+        if ($email['location_type_id'] == $ltGov) {
+          $instances[] = $instance;
+        }
+      }
+      $form->assign('hiddenEmail', json_encode($instances));
+    }
+    else {
+      $ltGov = getPermissionedLocationType();
+      $emails = civicrm_api3("Email", "get", array(
+        "contact_id" => $form->_contactId,
+        "location_type_id" => $ltGov,
+        "return" => array("email"),
+      ));
+      if (count($emails) > 0) {
+        foreach ($emails['values'] as $email) {
+          $emailsToHide[] = $email['email'];
+        }
+      }
+      $form->assign('emailsToHide', json_encode($emailsToHide));
+    }
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/LTGov.tpl',
+    ));
   }
 }
 

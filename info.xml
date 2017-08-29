@@ -22,6 +22,6 @@
   </compatibility>
   <comments>Module developed for Vermont Progresive Party</comments>
   <civix>
-    <namespace>CRM/Permlocationtype</namespace>
+    <namespace>CRM/PermLocationType</namespace>
   </civix>
 </extension>
