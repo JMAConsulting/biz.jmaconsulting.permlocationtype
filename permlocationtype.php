@@ -224,7 +224,7 @@ function permlocationtype_civicrm_buildForm($formName, &$form) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
  */
 function permlocationtype_civicrm_fieldOptions($entity, $field, &$options, $params) {
-  if ($field == "location_type_id") {
+  if ($field == "location_type_id" && $params["context"] == "create") {
     $ltGov = getPermissionedLocationType();
     if (!CRM_Core_Permission::check('access LtGov location type') && $entity == "Email") {
       unset($options[$ltGov]);
