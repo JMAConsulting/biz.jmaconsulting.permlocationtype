@@ -167,7 +167,7 @@ function removeEmails(&$emails) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
  */
 function permlocationtype_civicrm_pageRun(&$page) {
-  if (CRM_Core_Permission::check('access LtGov location type') && get_class($page) == "CRM_Contact_Page_View_Summary") {
+  if (!CRM_Core_Permission::check('access LtGov location type') && get_class($page) == "CRM_Contact_Page_View_Summary") {
     $emails = CRM_Core_Smarty::singleton()->get_template_vars('email');
     removeEmails($emails);
     CRM_Core_Smarty::singleton()->assign('email', $emails);
@@ -188,7 +188,7 @@ function permlocationtype_civicrm_pageRun(&$page) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
  */
 function permlocationtype_civicrm_buildForm($formName, &$form) {
-  if (CRM_Core_Permission::check('access LtGov location type') && in_array($formName, array("CRM_Contact_Form_Inline_Email", "CRM_Contact_Form_Contact"))) {
+  if (!CRM_Core_Permission::check('access LtGov location type') && in_array($formName, array("CRM_Contact_Form_Inline_Email", "CRM_Contact_Form_Contact"))) {
     if (!empty($form->_values['email'])) {
       $ltGov = getPermissionedLocationType();
       foreach ($form->_values['email'] as $instance => $email) {
