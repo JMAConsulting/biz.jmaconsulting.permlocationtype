@@ -54,9 +54,12 @@ class CRM_PermLocationType_BAO_Query {
    * @param $query
    */
   public static function where(&$query) {
+    $ltGov = getPermissionedLocationType();
     if (CRM_Utils_Array::value('civicrm_email', $query->_tables)) {
-      $ltGov = getPermissionedLocationType();
-      $query->_select['email'] = "IF(civicrm_email.location_type_id = {$ltGov}, '', civicrm_email.email) as email";
+      $query->_select['email'] = "IF(`civicrm_email`.location_type_id = {$ltGov}, '', `civicrm_email`.email) as `email`";
+    }
+    if (CRM_Utils_Array::value('LTGov-email', $query->_tables)) {
+      $query->_select['LTGov-email'] = "IF(`LTGov-email`.location_type_id = {$ltGov}, '', `LTGov-email`.email) as `LTGov-email`";
     }
   }
 
