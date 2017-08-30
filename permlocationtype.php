@@ -216,6 +216,24 @@ function permlocationtype_civicrm_buildForm($formName, &$form) {
       'template' => 'CRM/LTGov.tpl',
     ));
   }
+  if ($formName == "CRM_Admin_Form_LocationType") {
+    $id = $form->getVar('_id');
+    if (!empty($id) && $id == getPermissionedLocationType() && CRM_Core_Permission::check('access LtGov location type')) {
+      CRM_Utils_System::permissionDenied();
+      CRM_Utils_System::civiExit();
+    }
+  }
+}
+
+/**
+ * Implementation of hook_civicrm_queryObjects
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_queryObjects
+ */
+function permlocationtype_civicrm_queryObjects(&$queryObjects, $type) {
+  if (!CRM_Core_Permission::check('access LtGov location type') && $type == "Contact") {
+    $queryObjects[] = new CRM_PermLocationType_BAO_Query();
+  }
 }
 
 /**
