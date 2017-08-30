@@ -252,3 +252,16 @@ function permlocationtype_civicrm_fieldOptions($entity, $field, &$options, $para
     }
   }
 }
+
+/**
+ * Implementation of hook_civicrm_alterReportVar
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterReportVar
+ */
+function permlocationtype_civicrm_alterReportVar($varType, &$var, &$object) {
+  if (!CRM_Core_Permission::check('access LtGov location type') && $varType == 'sql' && CRM_Utils_Array::value('civicrm_email_email', $var->_columnHeaders)) {
+    $ltGov = getPermissionedLocationType();
+    $selectClause = "IF(email_civireport.location_type_id = {$ltGov}, '', email_civireport.email) as civicrm_email_email";
+    $var->_select = str_replace("email_civireport.email as civicrm_email_email", $selectClause, $var->_select);
+  }
+}
